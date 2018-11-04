@@ -1,0 +1,69 @@
+version: "3.6"
+services:
+
+# POSTGRESQL
+  zabbix-pgsql:
+<<<<<<< HEAD
+    image: leandromoreirajfa/zabbix-postgres:1.8
+=======
+    image: leandromoreirajfa/zabbix-postgres:1.9
+>>>>>>> e4764d92ca914b57d13c8f8f586dd215728fb631
+    hostname: zabbix-pgsql
+    command: setup.sh
+    volumes:
+       - postgresqldb:/var/lib/postgresql
+    env_file:
+      - postgres.config
+    ports:
+       - "5432:5432"
+    privileged: true
+    stdin_open: true
+    tty: true
+    sysctls:
+      - net.ipv4.ip_local_port_range=1024 65000
+      - net.ipv4.conf.all.accept_redirects=0
+      - net.ipv4.conf.all.secure_redirects=0
+      - net.ipv4.conf.all.send_redirects=0
+      - net.ipv6.conf.all.disable_ipv6=1
+      - net.ipv6.conf.default.disable_ipv6=1
+      - net.ipv6.conf.lo.disable_ipv6=1
+      - vm.max_map_count=262144
+    deploy:
+      #placement:
+       # constraints: [node.role == manager]
+      #replicas: 3
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '0.70'
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "250m"
+        max-file: "3"
+    networks:
+      - backend
+
+
+# VOLUME GRAFANA
+volumes:
+  postgresqldb:
+  
+# REDE
+networks:
+  backend:
+    driver: overlay   
+    ipam:
+      driver: default    
+      config:
+      - subnet: 172.30.0.0/24
+  frontend:
+    driver: overlay
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.31.0.0/24
